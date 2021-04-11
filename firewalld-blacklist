@@ -38,15 +38,21 @@ if [ -s "/etc/blacklist-by-ip" ]; then
         echo "Added IPs to blacklist ipset."
 fi    
 
-# Add the blacklist ipset to the drop zone if not already setup
-if firewall-cmd -q --zone=drop --query-source=ipset:blacklist; then
+#### DOES NOT WORK WITH THESE OPTIONS  ####
+#if firewall-cmd -q --permanent --zone=drop --query-source=ipset:blacklist; then
+#    echo "Blacklist already in firewalld drop zone."
+#else
+#    echo "Adding ipset blacklist to firewalld drop zone."
+#    firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist
+#fi
+
+if firewall-cmd -q --permanent --query-rich-rule='rule source ipset=blacklist drop'; then
     echo "Blacklist already in firewalld drop zone."
 else
     echo "Adding ipset blacklist to firewalld drop zone."
-    firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist
+    firewall-cmd --permanent --add-rich-rule='rule source ipset=blacklist drop'
 fi
 
 firewall-cmd -q --reload
-
 popd
 rm -rf $ipdeny_tmp_dir
